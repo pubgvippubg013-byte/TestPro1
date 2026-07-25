@@ -272,6 +272,45 @@ local senderLbl = mkLabel(Header, "Sender: " .. username, 11, C.muted, Enum.Font
 senderLbl.Position = UDim2.new(0, 12, 0, 20)
 senderLbl.Size = UDim2.new(1, -95, 0, 16)
 
+-- Minimize button
+local miniBtn = mkBtn(
+    Header,
+    "—",
+    UDim2.new(0,26,0,26),
+    UDim2.new(1,-92,0.5,-13),
+    Color3.fromRGB(80,80,100),
+    Color3.new(1,1,1)
+)
+
+local minimized = false
+local oldSize = Main.Size
+
+miniBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+
+    if minimized then
+        oldSize = Main.Size
+        Main.Size = UDim2.new(0,340,0,38)
+        miniBtn.Text = "+"
+        
+        -- ẩn nội dung
+        for _,v in ipairs(Main:GetChildren()) do
+            if v ~= Header then
+                v.Visible = false
+            end
+        end
+    else
+        Main.Size = oldSize
+        miniBtn.Text = "—"
+
+        for _,v in ipairs(Main:GetChildren()) do
+            if v ~= Header then
+                v.Visible = true
+            end
+        end
+    end
+end)
+
 local closeBtn = mkBtn(Header, "✕", UDim2.new(0,26,0,26), UDim2.new(1,-32,0.5,-13), C.red, Color3.new(1,1,1))
 closeBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
