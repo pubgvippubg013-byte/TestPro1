@@ -258,34 +258,8 @@ local function syncHistPos()
 end
 
 -- Drag: dùng Header làm handle để tránh scroll/button trong Main nuốt touch
-local function getPos2(inp)
-    -- Touch trả Vector3, Mouse trả Vector3 — lấy X,Y
-    return Vector2.new(inp.Position.X, inp.Position.Y)
-end
 
 -- Header
-
-Header.InputBegan:Connect(function(inp)
-    if isBeginInput(inp) then
-        dragging = true
-        dragStart = getPos2(inp)
-        startPos  = Main.Position
-    end
-end)
-Header.InputEnded:Connect(function(inp)
-    if isEndInput(inp) then dragging = false end
-end)
-UserInputService.InputChanged:Connect(function(inp)
-    if dragging and isMoveInput(inp) then
-        local p = getPos2(inp)
-        local dx = p.X - dragStart.X
-        local dy = p.Y - dragStart.Y
-        Main.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + dx,
-            startPos.Y.Scale, startPos.Y.Offset + dy)
-        syncHistPos()
-    end
-end)
 
 local Header = mkFrame(Main, UDim2.new(1,0,0,38), UDim2.new(0,0,0,0), C.header, 10)
 mkFrame(Header, UDim2.new(1,0,0,10), UDim2.new(0,0,1,-10), C.header)
@@ -317,6 +291,33 @@ Instance.new("UICorner", MTBtn).CornerRadius = UDim.new(1,0)
 local mtStroke = Instance.new("UIStroke", MTBtn)
 mtStroke.Color = Color3.fromRGB(60,180,100); mtStroke.Thickness = 2
 MTBtn.Parent = ScreenGui
+
+local function getPos2(inp)
+    -- Touch trả Vector3, Mouse trả Vector3 — lấy X,Y
+    return Vector2.new(inp.Position.X, inp.Position.Y)
+end
+
+Header.InputBegan:Connect(function(inp)
+    if isBeginInput(inp) then
+        dragging = true
+        dragStart = getPos2(inp)
+        startPos  = Main.Position
+    end
+end)
+Header.InputEnded:Connect(function(inp)
+    if isEndInput(inp) then dragging = false end
+end)
+UserInputService.InputChanged:Connect(function(inp)
+    if dragging and isMoveInput(inp) then
+        local p = getPos2(inp)
+        local dx = p.X - dragStart.X
+        local dy = p.Y - dragStart.Y
+        Main.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + dx,
+            startPos.Y.Scale, startPos.Y.Offset + dy)
+        syncHistPos()
+    end
+end)
 
 -- =====================================================================
 -- HISTORY WINDOW (bên trái Main)
