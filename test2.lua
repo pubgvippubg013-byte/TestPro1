@@ -25,7 +25,6 @@ local defaultConfig = {
     RecipientUserId = 0,
     Note           = "Moimoi!!!",
     Seeds = {
-		["Mega Seed"]      = { enabled = false, amount = 1 },
         Acorn              = { enabled = false, amount = 1 },
         Apple              = { enabled = false, amount = 1 },
         Bamboo             = { enabled = false, amount = 1 },
@@ -61,7 +60,8 @@ local defaultConfig = {
         Sunflower          = { enabled = false, amount = 1 },
         Tomato             = { enabled = false, amount = 1 },
         Tulip              = { enabled = false, amount = 1 },
-        ["Venus Fly Trap"] = { enabled = false, amount = 1 },	    
+        ["Venus Fly Trap"] = { enabled = false, amount = 1 },
+	["Mega Seed"]      = { enabled = false, amount = 1 },
     },
     Pets = {
         Bee               = { enabled = false, amount = 1 },
@@ -924,7 +924,10 @@ end
 -- [FIX 1] SEED_KEY_MAP: Xác nhận bằng dump_seed_shop.lua
 -- key trong inv.Seeds = display name y chang (giữ space + apostrophe)
 -- VD: inv.Seeds["Dragon's Breath"] = 1  (KHÔNG phải "DragonsBreath")
-local SEED_KEY_MAP = {}  -- empty: key game = display name
+-- local SEED_KEY_MAP = {}  -- empty: key game = display name
+local SEED_KEY_MAP = {
+    ["Mega Seed"] = "Mega Seed"
+}
 
 -- [FIX 2] GEAR_KEY_MAP: Xác nhận bằng dump_gear_shop.lua
 -- key trong inv.WateringCans["Super Watering Can"] = display name
