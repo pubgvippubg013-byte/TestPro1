@@ -1035,6 +1035,10 @@ local function collectPayload()
     local payload = {}
     local inv = getInvSafe()
 
+	for k,v in pairs(inv.Seeds or {}) do
+    print("SEED KEY:", k)
+end
+
     -- Seeds: key = display name (confirmed by dump)
     local seedCfg = cfg["Seeds"] or {}
     for name, data in pairs(seedCfg) do
