@@ -22,17 +22,6 @@ local historyPath       = username .. "-sendmailgag2-history.json"
 local SEED_KEY_MAP = {
     ["Gold Seed"]       = "Gold",
     ["Rainbow Seed"]    = "Rainbow",
-    ["Baby Cactus"]     = "BabyCactus",
-    ["Dragon Fruit"]    = "DragonFruit",
-    ["Dragon's Breath"] = "DragonsBreath",
-    ["Ghost Pepper"]    = "GhostPepper",
-    ["Glow Mushroom"]   = "GlowMushroom",
-    ["Green Bean"]      = "GreenBean",
-    ["Horned Melon"]    = "HornedMelon",
-    ["Moon Bloom"]      = "MoonBloom",
-    ["Poison Apple"]    = "PoisonApple",
-    ["Poison Ivy"]      = "PoisonIvy",
-    ["Venus Fly Trap"]  = "VenusFlyTrap",
     ["Mega Seed"]       = "Mega",
 }
 
