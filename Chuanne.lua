@@ -857,7 +857,7 @@ local SEED_KEY_MAP = {
     ["Poison Apple"]     = "PoisonApple",
     ["Poison Ivy"]       = "PoisonIvy",
     ["Venus Fly Trap"]   = "VenusFlyTrap",
-    ["Mega Seed"]   = "Mega",
+    ["Mega Seed"]   = ["Mega Seed"],
 }
 local GEAR_KEY_MAP = {}
 
