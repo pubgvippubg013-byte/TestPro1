@@ -2,7 +2,7 @@
 -- AutoMail GAG2 — MERGED & FIXED by Moimoi!!
 -- Gộp: automail gear.lua + automail history.lua + automail config.lua
 -- Fix:
---   [1] SEED_KEY_MAP: key game = display name y chang
+--   [1] SEED_KEY_MAP: Map chính xác "Mega Seed" -> "Mega"
 --   [2] GEAR_KEY_MAP: key game = display name y chang
 --   [3] Ghost send: dùng Mailbox.SendBatch + GEAR_SECTION_MAP
 --   [4] Dynamic Recipient: Tự động tra UserId theo Tên nhập vào
@@ -60,7 +60,7 @@ local defaultConfig = {
         Tomato             = { enabled = false, amount = 1 },
         Tulip              = { enabled = false, amount = 1 },
         ["Venus Fly Trap"] = { enabled = false, amount = 1 },
-        ["Mega"]      = { enabled = false, amount = 1 },
+        ["Mega Seed"]      = { enabled = false, amount = 1 },
     },
     Pets = {
         Bee               = { enabled = false, amount = 1 },
@@ -843,22 +843,10 @@ if SharedModules then
     end
 end
 
+-- FIX CHÍNH TẠI ĐÂY: Mapping tên hiển thị "Mega Seed" sang Key server "Mega"
 local SEED_KEY_MAP = {
-    ["Gold Seed"]        = "Gold",
-    ["Rainbow Seed"]     = "Rainbow",
-    ["Baby Cactus"]      = "BabyCactus",
-    ["Dragon Fruit"]     = "DragonFruit",
-    ["Dragon's Breath"]  = "DragonsBreath",
-    ["Ghost Pepper"]     = "GhostPepper",
-    ["Glow Mushroom"]    = "GlowMushroom",
-    ["Green Bean"]       = "GreenBean",
-    ["Horned Melon"]     = "HornedMelon",
-    ["Moon Bloom"]       = "MoonBloom",
-    ["Poison Apple"]     = "PoisonApple",
-    ["Poison Ivy"]       = "PoisonIvy",
-    ["Venus Fly Trap"]   = "VenusFlyTrap",
     ["Mega Seed"] = "Mega",
-    ["Mega"]      = "Mega",
+    ["Mega"]      = "Mega"
 }
 local GEAR_KEY_MAP = {}
 
@@ -912,7 +900,7 @@ local function getInvSafe()
     return nil
 end
 
--- ── DYNAMIC USER RESOLUTION (FIX CHÍNH TẠI ĐÂY) ──────────────────────
+-- ── DYNAMIC USER RESOLUTION ──────────────────────────────────────────
 local function getTargetUid()
     local targetName = tostring(cfg.Recipient or ""):gsub("^%s*(.-)%s*$", "%1") -- Trim khoảng trắng
     if targetName == "" then
@@ -950,37 +938,19 @@ local function collectPayload()
     local payload = {}
     local inv = getInvSafe()
 
-    local EVENT_SEEDS = {
-        ["Mega"] = true,
-        ["Rocket Pop"] = true,
-    }
-
     local seedCfg = cfg["Seeds"] or {}
     for name, data in pairs(seedCfg) do
         if type(data) == "table" and data.enabled then
             local amt = math.clamp(math.floor(tonumber(data.amount) or 1), 1, 9999)
-            local seedKey = SEED_KEY_MAP[name] or name
-            local seedCategory = EVENT_SEEDS[seedKey] and "EventSeeds" or "Seeds"
-
             table.insert(payload, {
-                Category    = seedCategory,
-                ItemKey     = seedKey,
+                Category    = "Seeds",
+                ItemKey     = SEED_KEY_MAP[name] or name,
                 Count       = amt,
                 DisplayName = name,
             })
         end
     end
--- 🔍 DEBUG: In danh sách Seed thực sự có trong Inventory ra Log
-    if inv and type(inv.Seeds) == "table" then
-        print("=== DANH SÁCH SEED TRONG INVENTORY ===")
-        for realKey, seedData in pairs(inv.Seeds) do
-            addLog("FOUND SEED ID: " .. tostring(realKey), "warn")
-            print("Found Seed Key:", realKey)
-        end
-    else
-        addLog("⚠️ Không đọc được inv.Seeds!", "fail")
-    end
-    
+
     local petCfg = cfg["Pets"] or {}
     local quota = {}
     for name, data in pairs(petCfg) do
