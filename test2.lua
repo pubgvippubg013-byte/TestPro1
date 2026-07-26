@@ -967,6 +967,9 @@ pcall(function()
 end)
 
 local function getInvSafe()
+	for k,v in pairs(inv.Seeds or {}) do
+    print("SEED:", k, v)
+end
     if not _PSC then return nil end
     local replica = nil
     if type(_PSC.WaitForLocalReplica) == "function" then
