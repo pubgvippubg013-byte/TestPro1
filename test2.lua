@@ -924,10 +924,7 @@ end
 -- [FIX 1] SEED_KEY_MAP: Xác nhận bằng dump_seed_shop.lua
 -- key trong inv.Seeds = display name y chang (giữ space + apostrophe)
 -- VD: inv.Seeds["Dragon's Breath"] = 1  (KHÔNG phải "DragonsBreath")
--- local SEED_KEY_MAP = {}  -- empty: key game = display name
-local SEED_KEY_MAP = {
-    ["Mega Seed"] = "Mega Seed"
-}
+local SEED_KEY_MAP = {}  -- empty: key game = display name
 
 -- [FIX 2] GEAR_KEY_MAP: Xác nhận bằng dump_gear_shop.lua
 -- key trong inv.WateringCans["Super Watering Can"] = display name
@@ -967,9 +964,6 @@ pcall(function()
 end)
 
 local function getInvSafe()
-	for k,v in pairs(inv.Seeds or {}) do
-    print("SEED:", k, v)
-end
     if not _PSC then return nil end
     local replica = nil
     if type(_PSC.WaitForLocalReplica) == "function" then
@@ -1037,10 +1031,6 @@ end
 local function collectPayload()
     local payload = {}
     local inv = getInvSafe()
-
-	for k,v in pairs(inv.Seeds or {}) do
-    print("SEED KEY:", k)
-end
 
     -- Seeds: key = display name (confirmed by dump)
     local seedCfg = cfg["Seeds"] or {}
