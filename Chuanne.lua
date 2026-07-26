@@ -843,10 +843,7 @@ if SharedModules then
     end
 end
 
-local SEED_KEY_MAP = {
-    ["Mega Seed"] = "Mega",
-    ["Rocket Pop"] = "Rocket Pop",
-}
+local SEED_KEY_MAP = {}
 local GEAR_KEY_MAP = {}
 
 local GEAR_SECTION_MAP = {
@@ -937,19 +934,26 @@ local function collectPayload()
     local payload = {}
     local inv = getInvSafe()
 
+    local EVENT_SEEDS = {
+        ["Mega"] = true,
+        ["Rocket Pop"] = true,
+    }
+
     local seedCfg = cfg["Seeds"] or {}
     for name, data in pairs(seedCfg) do
         if type(data) == "table" and data.enabled then
             local amt = math.clamp(math.floor(tonumber(data.amount) or 1), 1, 9999)
+            local seedKey = SEED_KEY_MAP[name] or name
+            local seedCategory = EVENT_SEEDS[seedKey] and "EventSeeds" or "Seeds"
+
             table.insert(payload, {
-                Category    = "Seeds",
-                ItemKey     = SEED_KEY_MAP[name] or name,
+                Category    = seedCategory,
+                ItemKey     = seedKey,
                 Count       = amt,
                 DisplayName = name,
             })
         end
     end
-
 -- 🔍 DEBUG: In danh sách Seed thực sự có trong Inventory ra Log
     if inv and type(inv.Seeds) == "table" then
         print("=== DANH SÁCH SEED TRONG INVENTORY ===")
