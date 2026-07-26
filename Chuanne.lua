@@ -2,7 +2,7 @@
 -- AutoMail GAG2 — MERGED & FIXED by Moimoi!!
 -- Gộp: automail gear.lua + automail history.lua + automail config.lua
 -- Fix:
---   [1] SEED_KEY_MAP: Map chính xác "Mega Seed" -> "Mega"
+--   [1] SEED_KEY_MAP: Khớp chính xác Key Game theo hình ảnh
 --   [2] GEAR_KEY_MAP: key game = display name y chang
 --   [3] Ghost send: dùng Mailbox.SendBatch + GEAR_SECTION_MAP
 --   [4] Dynamic Recipient: Tự động tra UserId theo Tên nhập vào
@@ -15,6 +15,49 @@ local LocalPlayer       = Players.LocalPlayer
 local username          = LocalPlayer.Name
 local configPath        = username .. "-sendmailgag2.json"
 local historyPath       = username .. "-sendmailgag2-history.json"
+
+-- =====================================================================
+-- SEED KEY MAP (Cập nhật chuẩn theo ảnh)
+-- =====================================================================
+local SEED_KEY_MAP = {
+    ["Gold Seed"]       = "Gold",
+    ["Rainbow Seed"]    = "Rainbow",
+    ["Baby Cactus"]     = "BabyCactus",
+    ["Dragon Fruit"]    = "DragonFruit",
+    ["Dragon's Breath"] = "DragonsBreath",
+    ["Ghost Pepper"]    = "GhostPepper",
+    ["Glow Mushroom"]   = "GlowMushroom",
+    ["Green Bean"]      = "GreenBean",
+    ["Horned Melon"]    = "HornedMelon",
+    ["Moon Bloom"]      = "MoonBloom",
+    ["Poison Apple"]    = "PoisonApple",
+    ["Poison Ivy"]      = "PoisonIvy",
+    ["Venus Fly Trap"]  = "VenusFlyTrap",
+    ["Mega Seed"]       = "Mega",
+}
+
+local GEAR_KEY_MAP = {}
+
+local GEAR_SECTION_MAP = {
+    ["Common Watering Can"]   = "WateringCans",
+    ["Super Watering Can"]    = "WateringCans",
+    ["Uncommon Sprinkler"]    = "Sprinklers",
+    ["Rare Sprinkler"]        = "Sprinklers",
+    ["Legendary Sprinkler"]   = "Sprinklers",
+    ["Super Sprinkler"]       = "Sprinklers",
+    ["Trowel"]                = "Trowels",
+    ["Sign"]                  = "Signs",
+    ["Basic Pot"]             = "Pots",
+    ["Jump Mushroom"]         = "Mushrooms",
+    ["Speed Mushroom"]        = "Mushrooms",
+    ["Supersize Mushroom"]    = "Mushrooms",
+    ["Invisibility Mushroom"] = "Mushrooms",
+    ["Lantern"]               = "Lanterns",
+    ["Gnome"]                 = "Gnomes",
+    ["Flashbang"]             = "Flashbangs",
+    ["Teleporter"]            = "Teleporters",
+    ["Wheelbarrow"]           = "Wheelbarrows",
+}
 
 -- =====================================================================
 -- DEFAULT CONFIG
@@ -843,36 +886,6 @@ if SharedModules then
     end
 end
 
--- FIX CHÍNH TẠI ĐÂY: Mapping tên hiển thị "Mega Seed" sang Key server "Mega"
-local SEED_KEY_MAP = {
-    ["Mega Seed"] = "Mega",
-    ["Gold Seed"]        = "Gold",
-    ["Rainbow Seed"]     = "Rainbow",
-    ["Mega"]      = "Mega"
-}
-local GEAR_KEY_MAP = {}
-
-local GEAR_SECTION_MAP = {
-    ["Common Watering Can"]   = "WateringCans",
-    ["Super Watering Can"]    = "WateringCans",
-    ["Uncommon Sprinkler"]    = "Sprinklers",
-    ["Rare Sprinkler"]        = "Sprinklers",
-    ["Legendary Sprinkler"]   = "Sprinklers",
-    ["Super Sprinkler"]       = "Sprinklers",
-    ["Trowel"]                = "Trowels",
-    ["Sign"]                  = "Signs",
-    ["Basic Pot"]             = "Pots",
-    ["Jump Mushroom"]         = "Mushrooms",
-    ["Speed Mushroom"]        = "Mushrooms",
-    ["Supersize Mushroom"]    = "Mushrooms",
-    ["Invisibility Mushroom"] = "Mushrooms",
-    ["Lantern"]               = "Lanterns",
-    ["Gnome"]                 = "Gnomes",
-    ["Flashbang"]             = "Flashbangs",
-    ["Teleporter"]            = "Teleporters",
-    ["Wheelbarrow"]           = "Wheelbarrows",
-}
-
 local _PSC = nil
 pcall(function()
     _PSC = require(
@@ -904,12 +917,11 @@ end
 
 -- ── DYNAMIC USER RESOLUTION ──────────────────────────────────────────
 local function getTargetUid()
-    local targetName = tostring(cfg.Recipient or ""):gsub("^%s*(.-)%s*$", "%1") -- Trim khoảng trắng
+    local targetName = tostring(cfg.Recipient or ""):gsub("^%s*(.-)%s*$", "%1")
     if targetName == "" then
         return nil, "Chưa nhập tên người nhận!"
     end
 
-    -- 1. Thử qua Networking Mailbox Lookup (nếu game có API riêng)
     if Networking and Networking.Mailbox and Networking.Mailbox.LookupPlayer then
         local ok, uid = pcall(function()
             return Networking.Mailbox.LookupPlayer:Fire(targetName)
@@ -920,7 +932,6 @@ local function getTargetUid()
         end
     end
 
-    -- 2. Thử tra cứu UserId trực tiếp từ Roblox Web API (Async)
     local ok, uid = pcall(function()
         return Players:GetUserIdFromNameAsync(targetName)
     end)
@@ -1234,5 +1245,5 @@ end)
 syncHistPos()
 rebuildHistoryFiltered(filterVal)
 
-print("[AutoMailUI] Dynamic User Fix Loaded — Config:", configPath)
+print("[AutoMailUI] Seed Key Map Fixed — Config:", configPath)
 setStatus("Ready — " .. configPath, C.muted)
