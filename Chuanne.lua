@@ -949,6 +949,17 @@ local function collectPayload()
         end
     end
 
+-- 🔍 DEBUG: In danh sách Seed thực sự có trong Inventory ra Log
+    if inv and type(inv.Seeds) == "table" then
+        print("=== DANH SÁCH SEED TRONG INVENTORY ===")
+        for realKey, seedData in pairs(inv.Seeds) do
+            addLog("FOUND SEED ID: " .. tostring(realKey), "warn")
+            print("Found Seed Key:", realKey)
+        end
+    else
+        addLog("⚠️ Không đọc được inv.Seeds!", "fail")
+    end
+    
     local petCfg = cfg["Pets"] or {}
     local quota = {}
     for name, data in pairs(petCfg) do
