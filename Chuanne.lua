@@ -843,7 +843,21 @@ if SharedModules then
     end
 end
 
-local SEED_KEY_MAP = {}
+local SEED_KEY_MAP = {
+    ["Gold Seed"]        = "Gold",
+    ["Rainbow Seed"]     = "Rainbow",
+    ["Baby Cactus"]      = "BabyCactus",
+    ["Dragon Fruit"]     = "DragonFruit",
+    ["Dragon's Breath"] = "DragonsBreath",
+    ["Ghost Pepper"]     = "GhostPepper",
+    ["Glow Mushroom"]    = "GlowMushroom",
+    ["Green Bean"]       = "GreenBean",
+    ["Horned Melon"]     = "HornedMelon",
+    ["Moon Bloom"]       = "MoonBloom",
+    ["Poison Apple"]     = "PoisonApple",
+    ["Poison Ivy"]       = "PoisonIvy",
+    ["Venus Fly Trap"]   = "VenusFlyTrap",
+}
 local GEAR_KEY_MAP = {}
 
 local GEAR_SECTION_MAP = {
