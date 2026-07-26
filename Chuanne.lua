@@ -844,7 +844,8 @@ if SharedModules then
 end
 
 local SEED_KEY_MAP = {
-    ["Mega Seed"] = "Mega Seed", -- Hoặc đổi thành...
+    ["Mega Seed"] = "Mega",
+    ["Rocket Pop"] = "Rocket Pop",
 }
 local GEAR_KEY_MAP = {}
 
