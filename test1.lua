@@ -845,6 +845,8 @@ end
 
 -- FIX CHÍNH TẠI ĐÂY: Mapping tên hiển thị "Mega Seed" sang Key server "Mega"
 local SEED_KEY_MAP = {
+    ["Gold Seed"]        = "Gold",
+    ["Rainbow Seed"]     = "Rainbow",
     ["Mega Seed"] = "Mega",
     ["Mega"]      = "Mega"
 }
