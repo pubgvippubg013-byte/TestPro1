@@ -60,7 +60,7 @@ local defaultConfig = {
         Tomato             = { enabled = false, amount = 1 },
         Tulip              = { enabled = false, amount = 1 },
         ["Venus Fly Trap"] = { enabled = false, amount = 1 },
-        ["Mega Seed"]      = { enabled = false, amount = 1 },
+        ["Mega"]      = { enabled = false, amount = 1 },
     },
     Pets = {
         Bee               = { enabled = false, amount = 1 },
