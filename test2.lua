@@ -25,6 +25,7 @@ local defaultConfig = {
     RecipientUserId = 0,
     Note           = "Moimoi!!!",
     Seeds = {
+		["Mega Seed"]      = { enabled = false, amount = 1 },
         Acorn              = { enabled = false, amount = 1 },
         Apple              = { enabled = false, amount = 1 },
         Bamboo             = { enabled = false, amount = 1 },
@@ -60,8 +61,7 @@ local defaultConfig = {
         Sunflower          = { enabled = false, amount = 1 },
         Tomato             = { enabled = false, amount = 1 },
         Tulip              = { enabled = false, amount = 1 },
-        ["Venus Fly Trap"] = { enabled = false, amount = 1 },
-	    ["Mega Seed"]      = { enabled = false, amount = 1 },
+        ["Venus Fly Trap"] = { enabled = false, amount = 1 },	    
     },
     Pets = {
         Bee               = { enabled = false, amount = 1 },
