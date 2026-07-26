@@ -848,7 +848,7 @@ local SEED_KEY_MAP = {
     ["Rainbow Seed"]     = "Rainbow",
     ["Baby Cactus"]      = "BabyCactus",
     ["Dragon Fruit"]     = "DragonFruit",
-    ["Dragon's Breath"] = "DragonsBreath",
+    ["Dragon's Breath"]  = "DragonsBreath",
     ["Ghost Pepper"]     = "GhostPepper",
     ["Glow Mushroom"]    = "GlowMushroom",
     ["Green Bean"]       = "GreenBean",
@@ -857,7 +857,7 @@ local SEED_KEY_MAP = {
     ["Poison Apple"]     = "PoisonApple",
     ["Poison Ivy"]       = "PoisonIvy",
     ["Venus Fly Trap"]   = "VenusFlyTrap",
-    ["Mega Seed"]   = ["Mega Seed"],
+    ["Mega Seed"]        = "Mega",
 }
 local GEAR_KEY_MAP = {}
 
