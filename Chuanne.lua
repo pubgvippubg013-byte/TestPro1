@@ -17,12 +17,49 @@ local configPath        = username .. "-sendmailgag2.json"
 local historyPath       = username .. "-sendmailgag2-history.json"
 
 -- =====================================================================
--- SEED KEY MAP (Cập nhật chuẩn theo ảnh)
+-- SEED KEY MAP (Bổ sung đầy đủ cho toàn bộ danh sách Seed)
 -- =====================================================================
 local SEED_KEY_MAP = {
-    ["Gold Seed"]       = "Gold",
-    ["Rainbow Seed"]    = "Rainbow",
-    ["Mega Seed"]       = "Mega",
+    -- Các hạt chuẩn cũ
+    ["Gold Seed"]        = "Gold",
+    ["Rainbow Seed"]     = "Rainbow",
+    ["Baby Cactus"]      = "BabyCactus",
+    ["Dragon Fruit"]     = "DragonFruit",
+    ["Dragon's Breath"]  = "Dragon's Breath",
+    ["Ghost Pepper"]     = "GhostPepper",
+    ["Glow Mushroom"]    = "GlowMushroom",
+    ["Green Bean"]       = "GreenBean",
+    ["Horned Melon"]     = "HornedMelon",
+    ["Moon Bloom"]       = "MoonBloom",
+    ["Poison Apple"]     = "PoisonApple",
+    ["Poison Ivy"]       = "PoisonIvy",
+    ["Venus Fly Trap"]   = "VenusFlyTrap",
+    ["Mega Seed"]        = "Mega",
+
+    -- Bổ sung các seed còn lại (Format theo Key Game)
+    ["Acorn"]            = "Acorn",
+    ["Apple"]            = "Apple",
+    ["Bamboo"]           = "Bamboo",
+    ["Banana"]           = "Banana",
+    ["Blueberry"]        = "Blueberry",
+    ["Beanstalk"]        = "Beanstalk",
+    ["Magic Beanstalk"]  = "MagicBeanstalk",
+    ["Cactus"]           = "Cactus",
+    ["Carrot"]           = "Carrot",
+    ["Cherry"]           = "Cherry",
+    ["Coconut"]          = "Coconut",
+    ["Corn"]             = "Corn",
+    ["Grape"]            = "Grape",
+    ["Hypnobloom"]       = "Hypnobloom",
+    ["Mango"]            = "Mango",
+    ["Mushroom"]         = "Mushroom",
+    ["Pineapple"]        = "Pineapple",
+    ["Pomegranate"]      = "Pomegranate",
+    ["Romanesco"]        = "Romanesco",
+    ["Strawberry"]       = "Strawberry",
+    ["Sunflower"]        = "Sunflower",
+    ["Tomato"]           = "Tomato",
+    ["Tulip"]            = "Tulip",
 }
 
 local GEAR_KEY_MAP = {}
