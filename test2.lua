@@ -2,11 +2,10 @@
 -- AutoMail GAG2 — MERGED & FIXED by Moimoi!!
 -- Gộp: automail gear.lua + automail history.lua + automail config.lua
 -- Fix:
---   [1] SEED_KEY_MAP: key game = display name y chang (xác nhận bằng dump)
+--   [1] SEED_KEY_MAP: key game = display name y chang
 --   [2] GEAR_KEY_MAP: key game = display name y chang
---   [3] Ghost send: bỏ Gifting.Send (không trả kết quả thật)
---       → dùng Mailbox.SendBatch + GEAR_SECTION_MAP (category đúng)
---   [4] Gear-only check: startBtn/onceBtn giờ check cả gearPayload
+--   [3] Ghost send: dùng Mailbox.SendBatch + GEAR_SECTION_MAP
+--   [4] Dynamic Recipient: Tự động tra UserId theo Tên nhập vào
 --   [5] History: addHistoryEntry cho cả Gear send
 -- ============================================================
 
@@ -21,7 +20,7 @@ local historyPath       = username .. "-sendmailgag2-history.json"
 -- DEFAULT CONFIG
 -- =====================================================================
 local defaultConfig = {
-    Recipient      = "nhap ten ngnhan",
+    Recipient      = "",
     RecipientUserId = 0,
     Note           = "Moimoi!!!",
     Seeds = {
@@ -61,7 +60,7 @@ local defaultConfig = {
         Tomato             = { enabled = false, amount = 1 },
         Tulip              = { enabled = false, amount = 1 },
         ["Venus Fly Trap"] = { enabled = false, amount = 1 },
-	["Mega Seed"]      = { enabled = false, amount = 1 },
+        ["Mega Seed"]      = { enabled = false, amount = 1 },
     },
     Pets = {
         Bee               = { enabled = false, amount = 1 },
@@ -136,7 +135,7 @@ local function saveHistory(hist)
 end
 
 local historyData = loadHistory()
-local historyScrollRef = nil  -- forward ref
+local historyScrollRef = nil
 local historyCountRef  = 0
 
 local savedCfg = loadConfig()
@@ -245,7 +244,7 @@ local Main = mkFrame(ScreenGui,
 Main.ClipsDescendants = true
 
 local dragging, dragStart, startPos
-local HistGui = nil  -- forward ref
+local HistGui = nil
 local histWasVisible = false
 local HIST_GAP = 6
 
@@ -258,10 +257,7 @@ local function syncHistPos()
     end
 end
 
--- Drag: dùng Header làm handle để tránh scroll/button trong Main nuốt touch
-
 -- Header
-
 local Header = mkFrame(Main, UDim2.new(1,0,0,38), UDim2.new(0,0,0,0), C.header, 10)
 mkFrame(Header, UDim2.new(1,0,0,10), UDim2.new(0,0,1,-10), C.header)
 
@@ -274,40 +270,24 @@ senderLbl.Position = UDim2.new(0, 12, 0, 20)
 senderLbl.Size = UDim2.new(1, -95, 0, 16)
 
 -- Minimize button
-local miniBtn = mkBtn(
-    Header,
-    "—",
-    UDim2.new(0,26,0,26),
-    UDim2.new(1,-92,0.5,-13),
-    Color3.fromRGB(80,80,100),
-    Color3.new(1,1,1)
-)
-
+local miniBtn = mkBtn(Header, "—", UDim2.new(0,26,0,26), UDim2.new(1,-92,0.5,-13), Color3.fromRGB(80,80,100), Color3.new(1,1,1))
 local minimized = false
 local oldSize = Main.Size
 
 miniBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
-
     if minimized then
         oldSize = Main.Size
         Main.Size = UDim2.new(0,340,0,38)
         miniBtn.Text = "+"
-        
-        -- ẩn nội dung
         for _,v in ipairs(Main:GetChildren()) do
-            if v ~= Header then
-                v.Visible = false
-            end
+            if v ~= Header then v.Visible = false end
         end
     else
         Main.Size = oldSize
         miniBtn.Text = "—"
-
         for _,v in ipairs(Main:GetChildren()) do
-            if v ~= Header then
-                v.Visible = true
-            end
+            if v ~= Header then v.Visible = true end
         end
     end
 end)
@@ -315,8 +295,7 @@ end)
 local closeBtn = mkBtn(Header, "✕", UDim2.new(0,26,0,26), UDim2.new(1,-32,0.5,-13), C.red, Color3.new(1,1,1))
 closeBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-local histBtn = mkBtn(Header, "📋", UDim2.new(0,26,0,26), UDim2.new(1,-62,0.5,-13),
-    Color3.fromRGB(30,50,80), C.blue)
+local histBtn = mkBtn(Header, "📋", UDim2.new(0,26,0,26), UDim2.new(1,-62,0.5,-13), Color3.fromRGB(30,50,80), C.blue)
 histBtn.TextSize = 14
 
 -- MT toggle button
@@ -333,7 +312,6 @@ mtStroke.Color = Color3.fromRGB(60,180,100); mtStroke.Thickness = 2
 MTBtn.Parent = ScreenGui
 
 local function getPos2(inp)
-    -- Touch trả Vector3, Mouse trả Vector3 — lấy X,Y
     return Vector2.new(inp.Position.X, inp.Position.Y)
 end
 
@@ -360,7 +338,7 @@ UserInputService.InputChanged:Connect(function(inp)
 end)
 
 -- =====================================================================
--- HISTORY WINDOW (bên trái Main)
+-- HISTORY WINDOW
 -- =====================================================================
 HistGui = mkFrame(ScreenGui,
     UDim2.new(0, 340, 0, 530),
@@ -369,7 +347,6 @@ HistGui = mkFrame(ScreenGui,
 HistGui.ClipsDescendants = true
 HistGui.Visible = false; HistGui.ZIndex = 5
 
--- History Header
 local HH = mkFrame(HistGui, UDim2.new(1,0,0,38), UDim2.new(0,0,0,0), C.histBg, 10)
 mkFrame(HH, UDim2.new(1,0,0,10), UDim2.new(0,0,1,-10), C.histBg)
 local hTitleLbl = mkLabel(HH, "📋 Lịch Sử Gửi", 14, C.blue, Enum.Font.GothamBold, Enum.TextXAlignment.Left)
@@ -377,11 +354,8 @@ hTitleLbl.Position = UDim2.new(0,12,0.5,-7); hTitleLbl.Size = UDim2.new(1,-46,0,
 local hCloseBtn = mkBtn(HH, "✕", UDim2.new(0,26,0,26), UDim2.new(1,-32,0.5,-13), C.red, Color3.new(1,1,1))
 hCloseBtn.MouseButton1Click:Connect(function() HistGui.Visible = false end)
 
--- Stat bar
-local histStatBar = mkFrame(HistGui, UDim2.new(1,-20,0,28), UDim2.new(0,10,0,44),
-    C.histBg, 6, Color3.fromRGB(40,60,100))
-local histStatLbl = mkLabel(histStatBar, "Tổng: 0  |  ✅ 0  |  ❌ 0", 11,
-    C.blue, Enum.Font.GothamBold, Enum.TextXAlignment.Left)
+local histStatBar = mkFrame(HistGui, UDim2.new(1,-20,0,28), UDim2.new(0,10,0,44), C.histBg, 6, Color3.fromRGB(40,60,100))
+local histStatLbl = mkLabel(histStatBar, "Tổng: 0  |  ✅ 0  |  ❌ 0", 11, C.blue, Enum.Font.GothamBold, Enum.TextXAlignment.Left)
 histStatLbl.Size = UDim2.new(1,-10,1,0); histStatLbl.Position = UDim2.new(0,8,0,0)
 
 local function updateHistStat()
@@ -394,29 +368,22 @@ local function updateHistStat()
     histStatLbl.Text = string.format("Tổng: %d  |  ✅ %d  |  ❌ %d", #historyData, ok2, fail2)
 end
 
--- Toolbar
 local toolbar = mkFrame(HistGui, UDim2.new(1,-20,0,26), UDim2.new(0,10,0,78), C.histBg, 6)
 local filterVal = "all"
-local fBtnAll  = mkBtn(toolbar, "Tất cả", UDim2.new(0,72,1,-2), UDim2.new(0,1,0,1),
-    Color3.fromRGB(40,60,100), Color3.fromRGB(180,200,255))
-local fBtnOk   = mkBtn(toolbar, "✅ OK", UDim2.new(0,72,1,-2), UDim2.new(0,76,0,1),
-    Color3.fromRGB(15,45,28), Color3.fromRGB(80,210,130))
-local fBtnFail = mkBtn(toolbar, "❌ Fail", UDim2.new(0,72,1,-2), UDim2.new(0,151,0,1),
-    Color3.fromRGB(50,15,15), Color3.fromRGB(220,80,80))
-local hClearBtn = mkBtn(toolbar, "🗑 Xóa", UDim2.new(1,-228,1,-2), UDim2.new(0,226,0,1),
-    Color3.fromRGB(40,15,15), C.red)
+local fBtnAll  = mkBtn(toolbar, "Tất cả", UDim2.new(0,72,1,-2), UDim2.new(0,1,0,1), Color3.fromRGB(40,60,100), Color3.fromRGB(180,200,255))
+local fBtnOk   = mkBtn(toolbar, "✅ OK", UDim2.new(0,72,1,-2), UDim2.new(0,76,0,1), Color3.fromRGB(15,45,28), Color3.fromRGB(80,210,130))
+local fBtnFail = mkBtn(toolbar, "❌ Fail", UDim2.new(0,72,1,-2), UDim2.new(0,151,0,1), Color3.fromRGB(50,15,15), Color3.fromRGB(220,80,80))
+local hClearBtn = mkBtn(toolbar, "🗑 Xóa", UDim2.new(1,-228,1,-2), UDim2.new(0,226,0,1), Color3.fromRGB(40,15,15), C.red)
 for _, b in ipairs({fBtnAll,fBtnOk,fBtnFail,hClearBtn}) do
     b.TextSize = 10; b.Font = Enum.Font.GothamBold
 end
 
--- Column headers
 local colHdr = mkFrame(HistGui, UDim2.new(1,-20,0,20), UDim2.new(0,10,0,110), C.histBg)
 local function mkColLabel(parent, txt, xScale, xOff, wScale, wOff)
     local l = Instance.new("TextLabel")
     l.Text = txt; l.Size = UDim2.new(wScale,wOff,1,0)
     l.Position = UDim2.new(xScale,xOff,0,0)
-    l.BackgroundTransparency = 1
-    l.TextColor3 = Color3.fromRGB(70,100,150)
+    l.BackgroundTransparency = 1; l.TextColor3 = Color3.fromRGB(70,100,150)
     l.Font = Enum.Font.GothamBold; l.TextSize = 10
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = parent
@@ -426,21 +393,15 @@ mkColLabel(colHdr, "LOẠI",        0.45, 0,  0.20, 0)
 mkColLabel(colHdr, "SL",          0.65, 0,  0.12, 0)
 mkColLabel(colHdr, "NGƯỜI NHẬN",  0.77, 0,  0.23, -4)
 
--- Divider
 mkFrame(HistGui, UDim2.new(1,-20,0,1), UDim2.new(0,10,0,130), Color3.fromRGB(40,60,100))
 
--- Scroll list
-local histListFrame = mkFrame(HistGui, UDim2.new(1,-20,0,368), UDim2.new(0,10,0,134),
-    C.histBg, 6, Color3.fromRGB(30,50,90))
+local histListFrame = mkFrame(HistGui, UDim2.new(1,-20,0,368), UDim2.new(0,10,0,134), C.histBg, 6, Color3.fromRGB(30,50,90))
 histListFrame.ClipsDescendants = true
 
 local histScroll = Instance.new("ScrollingFrame")
-histScroll.Size = UDim2.new(1,0,1,0)
-histScroll.BackgroundTransparency = 1; histScroll.BorderSizePixel = 0
-histScroll.ScrollBarThickness = 3
-histScroll.ScrollBarImageColor3 = C.blue
-histScroll.CanvasSize = UDim2.new(0,0,0,0)
-histScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+histScroll.Size = UDim2.new(1,0,1,0); histScroll.BackgroundTransparency = 1; histScroll.BorderSizePixel = 0
+histScroll.ScrollBarThickness = 3; histScroll.ScrollBarImageColor3 = C.blue
+histScroll.CanvasSize = UDim2.new(0,0,0,0); histScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 histScroll.Parent = histListFrame
 local histLayout = Instance.new("UIListLayout")
 histLayout.Padding = UDim.new(0,4); histLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -450,11 +411,8 @@ histPad.PaddingTop = UDim.new(0,4); histPad.PaddingLeft = UDim.new(0,4)
 histPad.PaddingRight = UDim.new(0,4); histPad.Parent = histScroll
 historyScrollRef = histScroll
 
--- Footer
-local hFooterFrame = mkFrame(HistGui, UDim2.new(1,-20,0,18), UDim2.new(0,10,0,506),
-    Color3.fromRGB(12,18,30), 4)
-local hFooterLbl = mkLabel(hFooterFrame, "📁 " .. historyPath, 9,
-    Color3.fromRGB(50,70,110), Enum.Font.Gotham, Enum.TextXAlignment.Left)
+local hFooterFrame = mkFrame(HistGui, UDim2.new(1,-20,0,18), UDim2.new(0,10,0,506), Color3.fromRGB(12,18,30), 4)
+local hFooterLbl = mkLabel(hFooterFrame, "📁 " .. historyPath, 9, Color3.fromRGB(50,70,110), Enum.Font.Gotham, Enum.TextXAlignment.Left)
 hFooterLbl.Size = UDim2.new(1,-4,1,0); hFooterLbl.Position = UDim2.new(0,4,0,0)
 hFooterLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
@@ -497,11 +455,9 @@ local function rebuildHistoryFiltered(filter)
         il.Text = tag .. " " .. tostring(entry.item or "?")
         il.Parent = row
 
-        -- Category badge
         local catLbl = Instance.new("TextLabel")
         catLbl.Size = UDim2.new(0.20,0,0,16); catLbl.Position = UDim2.new(0.45,0,0,6)
-        catLbl.BackgroundTransparency = 1
-        catLbl.TextColor3 = Color3.fromRGB(160,160,200)
+        catLbl.BackgroundTransparency = 1; catLbl.TextColor3 = Color3.fromRGB(160,160,200)
         catLbl.Font = Enum.Font.Gotham; catLbl.TextSize = 9
         catLbl.TextXAlignment = Enum.TextXAlignment.Left
         catLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -520,8 +476,7 @@ local function rebuildHistoryFiltered(filter)
 
         local rl = Instance.new("TextLabel")
         rl.Size = UDim2.new(1,-10,0,16); rl.Position = UDim2.new(0,10,0,26)
-        rl.BackgroundTransparency = 1
-        rl.TextColor3 = Color3.fromRGB(100,110,140)
+        rl.BackgroundTransparency = 1; rl.TextColor3 = Color3.fromRGB(100,110,140)
         rl.Font = Enum.Font.Gotham; rl.TextSize = 10
         rl.TextXAlignment = Enum.TextXAlignment.Left
         rl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -549,20 +504,10 @@ local function addHistoryEntry(recipient, item, amount, isOk, category)
     rebuildHistoryFiltered(filterVal)
 end
 
--- Filter buttons
-fBtnAll.MouseButton1Click:Connect(function()
-    filterVal = "all"; rebuildHistoryFiltered("all")
-end)
-fBtnOk.MouseButton1Click:Connect(function()
-    filterVal = "ok"; rebuildHistoryFiltered("ok")
-end)
-fBtnFail.MouseButton1Click:Connect(function()
-    filterVal = "fail"; rebuildHistoryFiltered("fail")
-end)
-hClearBtn.MouseButton1Click:Connect(function()
-    historyData = {}; saveHistory(historyData)
-    rebuildHistoryFiltered(filterVal); updateHistStat()
-end)
+fBtnAll.MouseButton1Click:Connect(function() filterVal = "all"; rebuildHistoryFiltered("all") end)
+fBtnOk.MouseButton1Click:Connect(function() filterVal = "ok"; rebuildHistoryFiltered("ok") end)
+fBtnFail.MouseButton1Click:Connect(function() filterVal = "fail"; rebuildHistoryFiltered("fail") end)
+hClearBtn.MouseButton1Click:Connect(function() historyData = {}; saveHistory(historyData); rebuildHistoryFiltered(filterVal); updateHistStat() end)
 histBtn.MouseButton1Click:Connect(function()
     HistGui.Visible = not HistGui.Visible
     if HistGui.Visible then syncHistPos(); rebuildHistoryFiltered(filterVal) end
@@ -571,9 +516,7 @@ end)
 -- MT Button drag + toggle
 local mtDragStart, mtStartPos, mtMoved
 MTBtn.InputBegan:Connect(function(inp)
-    if isBeginInput(inp) then
-        mtDragStart = getPos2(inp); mtStartPos = MTBtn.Position; mtMoved = false
-    end
+    if isBeginInput(inp) then mtDragStart = getPos2(inp); mtStartPos = MTBtn.Position; mtMoved = false end
 end)
 UserInputService.InputChanged:Connect(function(inp)
     if mtDragStart and isMoveInput(inp) then
@@ -582,9 +525,7 @@ UserInputService.InputChanged:Connect(function(inp)
         local dy = p.Y - mtDragStart.Y
         if math.abs(dx) > 6 or math.abs(dy) > 6 then mtMoved = true end
         if mtMoved then
-            MTBtn.Position = UDim2.new(
-                mtStartPos.X.Scale, mtStartPos.X.Offset + dx,
-                mtStartPos.Y.Scale, mtStartPos.Y.Offset + dy)
+            MTBtn.Position = UDim2.new(mtStartPos.X.Scale, mtStartPos.X.Offset + dx, mtStartPos.Y.Scale, mtStartPos.Y.Offset + dy)
         end
     end
 end)
@@ -618,7 +559,7 @@ recipIcon.TextXAlignment = Enum.TextXAlignment.Center
 
 local recipBox = Instance.new("TextBox")
 recipBox.Text = cfg.Recipient or ""
-recipBox.PlaceholderText = "Tên người nhận..."
+recipBox.PlaceholderText = "Tên người nhận (Username)..."
 recipBox.Size = UDim2.new(1,-30,1,0); recipBox.Position = UDim2.new(0,26,0,0)
 recipBox.BackgroundTransparency = 1; recipBox.TextColor3 = C.text
 recipBox.PlaceholderColor3 = C.muted; recipBox.TextSize = 12
@@ -641,7 +582,7 @@ noteBox:GetPropertyChangedSignal("Text"):Connect(function()
     cfg.Note = noteBox.Text; saveConfig(cfg)
 end)
 
--- Tab bar — Seeds | Pets | Gear | Log
+-- Tab bar
 local tabNames = {"Seeds", "Pets", "Gear", "Log"}
 local tabBar = mkFrame(Main, UDim2.new(1,-20,0,28), UDim2.new(0,10,0,108), C.panel, 6)
 local activeTab = "Seeds"
@@ -649,10 +590,7 @@ local tabBtns = {}
 
 local _tw = math.floor((316 - (#tabNames - 1) * 4) / #tabNames)
 for i, name in ipairs(tabNames) do
-    local tb = mkBtn(tabBar, name,
-        UDim2.new(0, _tw, 1, -4),
-        UDim2.new(0, (i-1)*(_tw+4) + 2, 0, 2),
-        C.tab, C.muted)
+    local tb = mkBtn(tabBar, name, UDim2.new(0, _tw, 1, -4), UDim2.new(0, (i-1)*(_tw+4) + 2, 0, 2), C.tab, C.muted)
     tb.Font = Enum.Font.GothamBold; tb.TextSize = 11
     tabBtns[name] = tb
 end
@@ -678,16 +616,14 @@ local scrollFrame = Instance.new("ScrollingFrame")
 scrollFrame.Size = UDim2.new(1,0,1,0); scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0; scrollFrame.ScrollBarThickness = 3
 scrollFrame.ScrollBarImageColor3 = C.accent
-scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
-scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scrollFrame.CanvasSize = UDim2.new(0,0,0,0); scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scrollFrame.Parent = listFrame
 
 local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0,3); listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 listLayout.Parent = scrollFrame
 local listPad = Instance.new("UIPadding")
-listPad.PaddingTop = UDim.new(0,4); listPad.PaddingLeft = UDim.new(0,4)
-listPad.PaddingRight = UDim.new(0,4); listPad.Parent = scrollFrame
+listPad.PaddingTop = UDim.new(0,4); listPad.PaddingLeft = UDim.new(0,4); listPad.PaddingRight = UDim.new(0,4); listPad.Parent = scrollFrame
 
 -- Log frame
 local logFrame = mkFrame(Main, UDim2.new(1,-20,0,228), UDim2.new(0,10,0,174), C.panel, 6, C.border)
@@ -697,23 +633,18 @@ local logScroll = Instance.new("ScrollingFrame")
 logScroll.Size = UDim2.new(1,0,1,0); logScroll.BackgroundTransparency = 1
 logScroll.BorderSizePixel = 0; logScroll.ScrollBarThickness = 3
 logScroll.ScrollBarImageColor3 = C.accent
-logScroll.CanvasSize = UDim2.new(0,0,0,0)
-logScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+logScroll.CanvasSize = UDim2.new(0,0,0,0); logScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 logScroll.Parent = logFrame
 
 local logListLayout = Instance.new("UIListLayout")
 logListLayout.Padding = UDim.new(0,2); logListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 logListLayout.Parent = logScroll
 local logPad = Instance.new("UIPadding")
-logPad.PaddingTop = UDim.new(0,4); logPad.PaddingLeft = UDim.new(0,6)
-logPad.PaddingRight = UDim.new(0,4); logPad.Parent = logScroll
+logPad.PaddingTop = UDim.new(0,4); logPad.PaddingLeft = UDim.new(0,6); logPad.PaddingRight = UDim.new(0,4); logPad.Parent = logScroll
 
--- Clear log button
-local clearLogBtn = mkBtn(Main, "🗑 Clear Log", UDim2.new(1,-20,0,22),
-    UDim2.new(0,10,0,406), Color3.fromRGB(40,20,20), C.red)
+local clearLogBtn = mkBtn(Main, "🗑 Clear Log", UDim2.new(1,-20,0,22), UDim2.new(0,10,0,406), Color3.fromRGB(40,20,20), C.red)
 clearLogBtn.TextSize = 11; clearLogBtn.Visible = false
 
--- Log system
 local logCount = 0
 local MAX_LOG = 300
 local LOG_COLORS = {
@@ -794,19 +725,13 @@ local function setStatus(msg, color)
 end
 
 -- Buttons
-local startBtn = mkBtn(Main, "▶  Start Gift ALL",
-    UDim2.new(1,-20,0,28), UDim2.new(0,10,0,430),
-    C.accent, Color3.fromRGB(10,20,15))
+local startBtn = mkBtn(Main, "▶  Start Gift ALL", UDim2.new(1,-20,0,28), UDim2.new(0,10,0,430), C.accent, Color3.fromRGB(10,20,15))
 startBtn.Font = Enum.Font.GothamBold; startBtn.TextSize = 13
 
-local onceBtn = mkBtn(Main, "⚡  Send Gift 1 lần",
-    UDim2.new(1,-20,0,26), UDim2.new(0,10,0,462),
-    Color3.fromRGB(60,80,160), Color3.fromRGB(200,210,255))
+local onceBtn = mkBtn(Main, "⚡  Send Gift 1 lần", UDim2.new(1,-20,0,26), UDim2.new(0,10,0,462), Color3.fromRGB(60,80,160), Color3.fromRGB(200,210,255))
 onceBtn.Font = Enum.Font.GothamBold; onceBtn.TextSize = 12
 
-local claimBtn = mkBtn(Main, "📬  Auto Claim Mail",
-    UDim2.new(1,-20,0,26), UDim2.new(0,10,0,496),
-    Color3.fromRGB(70,40,100), Color3.fromRGB(210,180,255))
+local claimBtn = mkBtn(Main, "📬  Auto Claim Mail", UDim2.new(1,-20,0,26), UDim2.new(0,10,0,496), Color3.fromRGB(70,40,100), Color3.fromRGB(210,180,255))
 claimBtn.Font = Enum.Font.GothamBold; claimBtn.TextSize = 12
 
 -- =====================================================================
@@ -845,13 +770,11 @@ local function buildRows(tabName)
             toggleBtn.BackgroundTransparency = 1; toggleBtn.Text = ""
             toggleBtn.Parent = row
 
-            local dot = mkLabel(row, data.enabled and "●" or "○", 12,
-                data.enabled and C.accent or C.muted, Enum.Font.GothamBold)
+            local dot = mkLabel(row, data.enabled and "●" or "○", 12, data.enabled and C.accent or C.muted, Enum.Font.GothamBold)
             dot.Size = UDim2.new(0,18,1,0); dot.Position = UDim2.new(0,8,0,0)
             dot.TextXAlignment = Enum.TextXAlignment.Center
 
-            local nameLbl = mkLabel(row, name, 12,
-                data.enabled and C.accent or C.text, Enum.Font.Gotham)
+            local nameLbl = mkLabel(row, name, 12, data.enabled and C.accent or C.text, Enum.Font.Gotham)
             nameLbl.Size = UDim2.new(1,-100,1,0); nameLbl.Position = UDim2.new(0,28,0,0)
 
             local amtLbl = mkLabel(row, "x", 11, C.muted, Enum.Font.Gotham, Enum.TextXAlignment.Right)
@@ -920,19 +843,9 @@ if SharedModules then
     end
 end
 
--- ── Key Maps ─────────────────────────────────────────────────────────
--- [FIX 1] SEED_KEY_MAP: Xác nhận bằng dump_seed_shop.lua
--- key trong inv.Seeds = display name y chang (giữ space + apostrophe)
--- VD: inv.Seeds["Dragon's Breath"] = 1  (KHÔNG phải "DragonsBreath")
-local SEED_KEY_MAP = {}  -- empty: key game = display name
+local SEED_KEY_MAP = {}
+local GEAR_KEY_MAP = {}
 
--- [FIX 2] GEAR_KEY_MAP: Xác nhận bằng dump_gear_shop.lua
--- key trong inv.WateringCans["Super Watering Can"] = display name
--- Các số từ MushroomData[N] là false positive (config, không phải inv key)
-local GEAR_KEY_MAP = {}  -- empty: key game = display name
-
--- [FIX 3] GEAR_SECTION_MAP: map gear display name → inventory section
--- Dùng làm Category khi gọi Mailbox.SendBatch (thay vì Gifting.Send ghost)
 local GEAR_SECTION_MAP = {
     ["Common Watering Can"]   = "WateringCans",
     ["Super Watering Can"]    = "WateringCans",
@@ -954,7 +867,6 @@ local GEAR_SECTION_MAP = {
     ["Wheelbarrow"]           = "Wheelbarrows",
 }
 
--- ── Inventory access ──────────────────────────────────────────────────
 local _PSC = nil
 pcall(function()
     _PSC = require(
@@ -984,47 +896,37 @@ local function getInvSafe()
     return nil
 end
 
--- ── Networking helpers ────────────────────────────────────────────────
-local function resolveUserId(name, userId)
-    if userId and userId > 0 then return userId end
-    local ok, id = pcall(function() return Players:GetUserIdFromNameAsync(name) end)
-    if ok and type(id) == "number" then return id end
-    return nil
-end
-
-local function lookupRecipient()
-    if not Networking or not Networking.Mailbox or not Networking.Mailbox.LookupPlayer then
-        return nil, "Không tìm thấy Networking.Mailbox"
-    end
-    local ok, uid = pcall(function()
-        return Networking.Mailbox.LookupPlayer:Fire(cfg.Recipient)
-    end)
-    if not ok or type(uid) ~= "number" or uid <= 0 then
-        return nil, "Không tìm thấy người nhận: " .. tostring(cfg.Recipient)
-    end
-    return uid, nil
-end
-
-local function sendBatch(uid, payload, note)
-    if not Networking or not Networking.Mailbox or not Networking.Mailbox.SendBatch then
-        return false, "SendBatch không có"
-    end
-    local ok, result, msg = pcall(function()
-        return Networking.Mailbox.SendBatch:Fire(uid, payload, tostring(note or ""))
-    end)
-    if not ok then return false, tostring(result) end
-    if result == true then return true, tostring(msg or "OK") end
-    return false, tostring(msg or "Lỗi gửi")
-end
-
+-- ── DYNAMIC USER RESOLUTION (FIX CHÍNH TẠI ĐÂY) ──────────────────────
 local function getTargetUid()
-    local uid, err = lookupRecipient()
-    if not uid then
-        uid = resolveUserId(cfg.Recipient, tonumber(cfg.RecipientUserId) or 0)
+    local targetName = tostring(cfg.Recipient or ""):gsub("^%s*(.-)%s*$", "%1") -- Trim khoảng trắng
+    if targetName == "" then
+        return nil, "Chưa nhập tên người nhận!"
     end
-    if not uid then return nil, err or "Không tìm thấy người nhận" end
-    if uid == LocalPlayer.UserId then return nil, "Không gửi cho chính mình" end
-    return uid, nil
+
+    -- 1. Thử qua Networking Mailbox Lookup (nếu game có API riêng)
+    if Networking and Networking.Mailbox and Networking.Mailbox.LookupPlayer then
+        local ok, uid = pcall(function()
+            return Networking.Mailbox.LookupPlayer:Fire(targetName)
+        end)
+        if ok and type(uid) == "number" and uid > 0 then
+            if uid == LocalPlayer.UserId then return nil, "Không gửi cho chính mình" end
+            return uid, nil
+        end
+    end
+
+    -- 2. Thử tra cứu UserId trực tiếp từ Roblox Web API (Async)
+    local ok, uid = pcall(function()
+        return Players:GetUserIdFromNameAsync(targetName)
+    end)
+
+    if ok and type(uid) == "number" and uid > 0 then
+        if uid == LocalPlayer.UserId then
+            return nil, "Không gửi cho chính mình"
+        end
+        return uid, nil
+    end
+
+    return nil, "Không tìm thấy User: " .. targetName
 end
 
 -- ── Collect payloads ──────────────────────────────────────────────────
@@ -1032,7 +934,6 @@ local function collectPayload()
     local payload = {}
     local inv = getInvSafe()
 
-    -- Seeds: key = display name (confirmed by dump)
     local seedCfg = cfg["Seeds"] or {}
     for name, data in pairs(seedCfg) do
         if type(data) == "table" and data.enabled then
@@ -1046,7 +947,6 @@ local function collectPayload()
         end
     end
 
-    -- Pets: UUID làm ItemKey, match tên với config
     local petCfg = cfg["Pets"] or {}
     local quota = {}
     for name, data in pairs(petCfg) do
@@ -1107,59 +1007,13 @@ local function collectGearPayload()
 end
 
 -- ── Send functions ────────────────────────────────────────────────────
-local function sendGearItems(uid, total, skip)
-    local gearPayload = collectGearPayload()
-    if #gearPayload == 0 then return total, skip end
-
-    if not Networking or not Networking.Mailbox or not Networking.Mailbox.SendBatch then
-        addLog("Gear FAIL: Mailbox.SendBatch không tìm thấy", "fail")
-        return total, skip
-    end
-
-    for i, item in ipairs(gearPayload) do
-        local category = GEAR_SECTION_MAP[item.name]
-        if not category then
-            addLog(string.format(
-                "Gear %s — SKIP: không biết section (thêm vào GEAR_SECTION_MAP)",
-                item.name), "warn")
-            skip += 1
-        else
-            setStatus(string.format(
-                "🎁 Gear [%d/%d] %s x%d | total: %d",
-                i, #gearPayload, item.name, item.amount, total
-            ), Color3.fromRGB(120, 180, 255))
-
-            local ok2, result, msg2 = pcall(function()
-                return Networking.Mailbox.SendBatch:Fire(uid, {
-                    { Category = category, ItemKey = item.itemKey, Count = item.amount }
-                }, tostring(cfg.Note or ""))
-            end)
-
-            if ok2 and result == true then
-                total += 1
-                addLog(string.format("Gear %s x%d — OK ✅", item.name, item.amount), "ok")
-                addHistoryEntry(cfg.Recipient, item.name, item.amount, true, category)
-            else
-                skip += 1
-                local errMsg = tostring(msg2 or result or "server reject")
-                addLog(string.format("Gear %s x%d — FAIL: %s", item.name, item.amount, errMsg), "fail")
-                addHistoryEntry(cfg.Recipient, item.name, item.amount, false, category)
-            end
-        end  -- end if/else category
-    end  -- end for gearPayload
-    return total, skip
-end
-
 local function sendOneRound(uid, total, skip)
-    -- ── Gom tất cả item (Seeds + Pets + Gear) vào 1 batch ──
     local seedsPets = collectPayload()
     local gears     = collectGearPayload()
 
-    -- Xây batchPayload: mỗi entry = {Category, ItemKey, Count}
     local batchPayload = {}
-    local batchMeta    = {}  -- thông tin để log sau khi có kết quả
+    local batchMeta    = {}
 
-    -- Seeds + Pets
     for _, item in ipairs(seedsPets) do
         table.insert(batchPayload, {
             Category = item.Category,
@@ -1173,12 +1027,10 @@ local function sendOneRound(uid, total, skip)
         })
     end
 
-    -- Gear: mỗi cái thêm vào batch cùng Category = section thật
     for _, item in ipairs(gears) do
         local category = GEAR_SECTION_MAP[item.name]
         if not category then
-            addLog(string.format(
-                "Gear %s — SKIP: không biết section", item.name), "warn")
+            addLog(string.format("Gear %s — SKIP: không biết section", item.name), "warn")
             skip += 1
         else
             table.insert(batchPayload, {
@@ -1196,32 +1048,20 @@ local function sendOneRound(uid, total, skip)
 
     if #batchPayload == 0 then return total, skip end
 
-    -- ── 1 lần SendBatch duy nhất ──────────────────────────────────
-    local itemList = {}
-    for _, m in ipairs(batchMeta) do
-        table.insert(itemList, m.displayName .. " x" .. m.count)
-    end
-    setStatus(string.format(
-        "📨 Gửi 1 batch (%d loại) → %s",
-        #batchPayload, cfg.Recipient
-    ), C.accent)
+    setStatus(string.format("📨 Gửi 1 batch (%d loại) → %s", #batchPayload, cfg.Recipient), C.accent)
 
     local ok2, result, msg2 = pcall(function()
         return Networking.Mailbox.SendBatch:Fire(uid, batchPayload, tostring(cfg.Note or ""))
     end)
 
     if ok2 and result == true then
-        -- Thành công: log từng item
         for _, m in ipairs(batchMeta) do
             addLog(string.format("Gift %s x%d — OK ✅", m.displayName, m.count), "ok")
             addHistoryEntry(cfg.Recipient, m.displayName, m.count, true, m.category)
             total += m.count
         end
-        addLog(string.format(
-            "── Batch OK | %d loại | tổng +%d ──",
-            #batchMeta, total), "sep")
+        addLog(string.format("── Batch OK | %d loại | tổng +%d ──", #batchMeta, total), "sep")
     else
-        -- Thất bại: log lý do
         local errMsg = tostring(msg2 or result or "server reject")
         addLog(string.format("Batch FAIL (%d loại): %s", #batchPayload, errMsg), "fail")
         for _, m in ipairs(batchMeta) do
@@ -1234,12 +1074,10 @@ local function sendOneRound(uid, total, skip)
     return total, skip
 end
 
-
 -- ── Button handlers ───────────────────────────────────────────────────
 local running = false
-
--- [FIX 4] Check cả gearPayload để không block khi chỉ chọn Gear
 local stopRequested = false
+
 startBtn.MouseButton1Click:Connect(function()
     if running then
         stopRequested = true
@@ -1247,9 +1085,10 @@ startBtn.MouseButton1Click:Connect(function()
         startBtn.BackgroundColor3 = Color3.fromRGB(160,80,20)
         return
     end
-    setStatus("Đang tìm người nhận...", C.muted)
+
+    setStatus("Đang tra cứu tên user...", C.muted)
     local uid, err = getTargetUid()
-    if not uid then setStatus("❌ " .. err, C.red) return end
+    if not uid then setStatus("❌ " .. err, C.red) addLog("Lỗi Tra Cứu: " .. err, "fail") return end
 
     local payload = collectPayload()
     local gearPayload = collectGearPayload()
@@ -1268,9 +1107,7 @@ startBtn.MouseButton1Click:Connect(function()
         while true do
             roundTotal, roundSkip = sendOneRound(uid, roundTotal, roundSkip)
             if stopRequested then break end
-            setStatus(string.format(
-                "🔄 Vòng xong | gửi: %d | skip: %d — tiếp...",
-                roundTotal, roundSkip), C.accent)
+            setStatus(string.format("🔄 Vòng xong | gửi: %d | skip: %d — tiếp...", roundTotal, roundSkip), C.accent)
             task.wait(1)
         end
         running = false; stopRequested = false
@@ -1284,9 +1121,10 @@ end)
 
 onceBtn.MouseButton1Click:Connect(function()
     if running then setStatus("⚠ Đang có loop chạy, dừng loop trước", C.red) return end
-    setStatus("Đang tìm người nhận...", C.muted)
+
+    setStatus("Đang tra cứu tên user...", C.muted)
     local uid, err = getTargetUid()
-    if not uid then setStatus("❌ " .. err, C.red) return end
+    if not uid then setStatus("❌ " .. err, C.red) addLog("Lỗi Tra Cứu: " .. err, "fail") return end
 
     local payload = collectPayload()
     local gearPayload = collectGearPayload()
@@ -1305,8 +1143,7 @@ onceBtn.MouseButton1Click:Connect(function()
         onceBtn.Text = "⚡  Send Gift 1 lần"
         onceBtn.BackgroundColor3 = Color3.fromRGB(60,80,160)
         addLog(string.format("1 lần xong | gửi: %d | skip: %d", total, skip), "info")
-        setStatus(string.format("✅ Done | gửi: %d | skip: %d", total, skip),
-            skip > 0 and C.red or C.accent)
+        setStatus(string.format("✅ Done | gửi: %d | skip: %d", total, skip), skip > 0 and C.red or C.accent)
     end)
 end)
 
@@ -1351,8 +1188,7 @@ claimBtn.MouseButton1Click:Connect(function()
                 end
                 for i, mailId in ipairs(ids) do
                     if not claimRunning then break end
-                    setStatus(string.format("📬 Claim [%d/%d] | tổng: %d", i, #ids, totalClaimed),
-                        Color3.fromRGB(210,180,255))
+                    setStatus(string.format("📬 Claim [%d/%d] | tổng: %d", i, #ids, totalClaimed), Color3.fromRGB(210,180,255))
                     local cok, success, reason = pcall(function()
                         return Networking.Mailbox.Claim:Fire(mailId)
                     end)
@@ -1373,7 +1209,7 @@ claimBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ── Hotkey Ctrl để toggle ─────────────────────────────────────────────
+-- ── Hotkey Ctrl toggle ────────────────────────────────────────────────
 UserInputService.InputBegan:Connect(function(inp, gp)
     if gp then return end
     if inp.KeyCode == Enum.KeyCode.LeftControl then
@@ -1392,5 +1228,5 @@ end)
 syncHistPos()
 rebuildHistoryFiltered(filterVal)
 
-print("[AutoMailUI] mailfixdone.lua loaded — Config:", configPath)
+print("[AutoMailUI] Dynamic User Fix Loaded — Config:", configPath)
 setStatus("Ready — " .. configPath, C.muted)
